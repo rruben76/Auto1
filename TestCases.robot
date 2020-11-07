@@ -1,114 +1,159 @@
 *** Settings ***
-Documentation   Auto1/QA Task
-Library         SeleniumLibrary
-Library         String
-Library         helpers.HelpLib
-Library         Collections    
-Suite Setup     Open URL Locally
-Suite Teardown  Close Browser
+Library  SeleniumLibrary
 
+*** Variables ***
+${BROWSER}   chrome
+${SELSPEED}  0.0s
 
 *** Test Cases ***
-TC1 - Check Filters on Advanced Searh Page
-    Given Open URL AutoHero
-    And User is on Advanced Search Page
-    When User Select Filter for First registration
-    And User Select Filter for Price Decsending
-    Then Verify all cars are filtered by First Registration
-    And Verify all Cars are Filtered By Price Descending
-
+Untitled Test Case
+    [Setup]  Run Keywords  Open Browser  https://www.autohero.com/de/  ${BROWSER}
+    ...              AND   Set Selenium Speed  ${SELSPEED}
+    # open    https://www.autohero.com/de/
+    click    link=Auto finden
+    click    xpath=//button[@id='advancedFilter']/span
+    click    xpath=(//button[@type='button'])[9]
+    [Teardown]  Close Browser
 
 *** Keywords ***
-Open Tests in Souce Labs
-    ${desired_capabilities}=    Create Dictionary
-    Set to Dictionary    ${desired_capabilities}    build    test_run
-    Set to Dictionary    ${desired_capabilities}    platformName    Windows 10
-    Set to Dictionary    ${desired_capabilities}    name    Auto1
-    Set to Dictionary    ${desired_capabilities}    browserName    chrome
+open
+    [Arguments]    ${element}
+    Go To          ${element}
 
-    ${executor}=    Evaluate          str('http://milan.novovic:0f772a45-b623-4d44-a01f-9a1db40f0d5d@ondemand.saucelabs.com:80/wd/hub')
-    Create Webdriver    Remote      desired_capabilities=${desired_capabilities}    command_executor=${executor}   
+clickAndWait
+    [Arguments]    ${element}
+    Click Element  ${element}
 
+click
+    [Arguments]    ${element}
+    Click Element  ${element}
 
-Open URL Locally
-    #Open Webdriver hosted on Azure Devops
-    Create Webdriver    Chrome    executable_path=D:/a/1/s/node_modules/chromedriver/lib/chromedriver/chromedriver.exe
-    
-    # Open Browser on Local Machine
-    # Open Browser    https://www.autohero.com/de/search/    chrome
-    Maximize Browser Window
+sendKeys
+    [Arguments]    ${element}    ${value}
+    Press Keys     ${element}    ${value}
 
-Open URL AutoHero
-    Go To    https://www.autohero.com/de/search/   
+submit
+    [Arguments]    ${element}
+    Submit Form    ${element}
 
-User is on Advanced Search Page
-    Sleep   5s
-    Click Element                       //button[contains(text(),'Erweiterte Suche')]
-    Wait Until Element Is Visible       //span[contains(text(),'Erstzulassung ab')]
+type
+    [Arguments]    ${element}    ${value}
+    Input Text     ${element}    ${value}
 
-User Select Filter for First registration
-    Click Element                        //span[contains(text(),'Erstzulassung ab')]
-    Wait Until Element Is Visible        //select[@name='yearRange.min']/*[text()='2014']   
-    Click Element                        //select[@name='yearRange.min']/*[text()='2014']
-    Sleep   3s
-    Click Element                        //a[contains(text(),'Ergebnisse')]
+selectAndWait
+    [Arguments]        ${element}  ${value}
+    Select From List   ${element}  ${value}
 
-Verify all cars are filtered by first registration
+select
+    [Arguments]        ${element}  ${value}
+    Select From List   ${element}  ${value}
 
-#This Keyword  will take all elements with registration, 
-#pass it to python method which will return if there are registration before 2014
- 
-    Sleep   3s
+verifyValue
+    [Arguments]                  ${element}  ${value}
+    Element Should Contain       ${element}  ${value}
 
-    @{locators}    Get Webelements      //*[contains(@class,'specItem___')][1]
-    @{result}=       Create List
-    
-    :FOR   ${locator}   IN    @{locators}
-        \       ${name}=    Get Text    ${locator}
-        \       ${matches}=		Get Regexp Matches      ${name}  	\\d{4}
-        \       Append To List   ${result}    ${matches}
-         ${flat}    Evaluate    [item for sublist in ${result} for item in (sublist if isinstance(sublist, list) else [sublist])]
+verifyText
+    [Arguments]                  ${element}  ${value}
+    Element Should Contain       ${element}  ${value}
 
-    ${numbs}=    Convert To Integer   2014
+verifyElementPresent
+    [Arguments]                  ${element}
+    Page Should Contain Element  ${element}
 
-    :FOR   ${locator}   IN    @{flat}
-    \   Log   ${locator}
-    \   Run Keyword Unless  ${locator} >= ${numbs}      Pass   
- 
-User Select Filter for Price Decsending 
-    Wait Until Element Is Visible    //select[contains(@name,'sort')]  
-    Click Element                    //select[contains(@name,'sort')]
-    Sleep   2s
-    Click Element                    //*[text()='Höchster Preis']
+verifyVisible
+    [Arguments]                  ${element}
+    Page Should Contain Element  ${element}
 
-Verify all Cars are Filtered By Price Descending
+verifyTitle
+    [Arguments]                  ${title}
+    Title Should Be              ${title}
 
-#Take all prices, create a list, and return as float so to check if list is sorted
+verifyTable
+    [Arguments]                  ${element}  ${value}
+    Element Should Contain       ${element}  ${value}
 
-    Sleep   2s
-    @{locators}    Get Webelements      //*[contains(@class,'totalPrice')][1]
-    ${priceAll}=       Create List
-    ${sortedList}=       Create List
-    :FOR   ${locator}   IN    @{locators}
-        \       ${name}=    Get Text    ${locator}
-        \       ${matches}=		Get Regexp Matches      ${name}  	\^.....     
-        \       Append To List  ${priceAll}  ${matches}
-        ${flat}    Evaluate    [item for sublist in ${priceAll} for item in (sublist if isinstance(sublist, list) else [sublist])]
+assertConfirmation
+    [Arguments]                  ${value}
+    Alert Should Be Present      ${value}
 
-    ${sortPrices}=    Sorted List     ${flat}
+assertText
+    [Arguments]                  ${element}  ${value}
+    Element Should Contain       ${element}  ${value}
 
-    Should Be Equal as Strings     ${sortPrices}   True
+assertValue
+    [Arguments]                  ${element}  ${value}
+    Element Should Contain       ${element}  ${value}
 
-    Log  ${sortPrices}
-    Log  ${flat}   
+assertElementPresent
+    [Arguments]                  ${element}
+    Page Should Contain Element  ${element}
 
+assertVisible
+    [Arguments]                  ${element}
+    Page Should Contain Element  ${element}
 
- 
+assertTitle
+    [Arguments]                  ${title}
+    Title Should Be              ${title}
 
+assertTable
+    [Arguments]                  ${element}  ${value}
+    Element Should Contain       ${element}  ${value}
 
+waitForText
+    [Arguments]                  ${element}  ${value}
+    Element Should Contain       ${element}  ${value}
 
+waitForValue
+    [Arguments]                  ${element}  ${value}
+    Element Should Contain       ${element}  ${value}
 
+waitForElementPresent
+    [Arguments]                  ${element}
+    Page Should Contain Element  ${element}
 
+waitForVisible
+    [Arguments]                  ${element}
+    Page Should Contain Element  ${element}
 
+waitForTitle
+    [Arguments]                  ${title}
+    Title Should Be              ${title}
 
+waitForTable
+    [Arguments]                  ${element}  ${value}
+    Element Should Contain       ${element}  ${value}
 
+doubleClick
+    [Arguments]           ${element}
+    Double Click Element  ${element}
+
+doubleClickAndWait
+    [Arguments]           ${element}
+    Double Click Element  ${element}
+
+goBack
+    Go Back
+
+goBackAndWait
+    Go Back
+
+runScript
+    [Arguments]         ${code}
+    Execute Javascript  ${code}
+
+runScriptAndWait
+    [Arguments]         ${code}
+    Execute Javascript  ${code}
+
+setSpeed
+    [Arguments]           ${value}
+    Set Selenium Timeout  ${value}
+
+setSpeedAndWait
+    [Arguments]           ${value}
+    Set Selenium Timeout  ${value}
+
+verifyAlert
+    [Arguments]              ${value}
+    Alert Should Be Present  ${value}
